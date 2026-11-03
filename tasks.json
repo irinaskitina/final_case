@@ -1,11 +1,5 @@
 [
     {
-        "title": "bhf",
-        "description": "fhb",
-        "priority": "Высокий",
-        "done": true
-    },
-    {
         "title": "Тест",
         "description": "проверка1",
         "priority": "Высокий",
@@ -15,7 +9,7 @@
         "title": "Что сделать",
         "description": "Купить хлеб",
         "priority": "Высокий",
-        "done": false
+        "done": true
     },
     {
         "title": "тест",
@@ -36,9 +30,38 @@
         "done": false
     },
     {
-        "title": "сио",
-        "description": "сри",
+        "title": "Проверка ",
+        "description": "Тест с датой",
+        "priority": "Высокий",
+        "done": true,
+        "deadline": "11.12.2026"
+    },
+    {
+        "title": "Проверка",
+        "description": "Тест с нумерацией",
         "priority": "Средний",
-        "done": false
+        "done": false,
+        "deadline": "11.12.2026"
+    },
+    {
+        "title": "Тест",
+        "description": "Проверка на вывод нумерации",
+        "priority": "Высокий",
+        "done": false,
+        "deadline": "11.12.2026"
+    },
+    {
+        "title": "Тест",
+        "description": "Тест123",
+        "priority": "Средний",
+        "done": false,
+        "deadline": "12.12.2026"
+    },
+    {
+        "title": "Тест",
+        "description": "Проверка фильтрации и сортировки с помощью ии",
+        "priority": "Высокий",
+        "done": true,
+        "deadline": "11.12.2026"
     }
 ]
