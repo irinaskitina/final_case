@@ -1,8 +1,8 @@
 import json
 import os
-from datetime import datetime 
+from datetime import datetime
 
-# блок проверки даты с помощью ИИ-ассистента
+# Блок ввода и проверки даты с помощью ИИ-ассистента
 def input_date():
     """Запрашивает дату в формате ДД.ММ.ГГГГ с проверкой."""
     while True:
@@ -10,29 +10,30 @@ def input_date():
         try:
             task_date = datetime.strptime(date_str, "%d.%m.%Y")
         except ValueError:
-            print("Ошибка: введите корректную дату в формате ДД.ММ.ГГГГ (например, 25.12.2026).")
+            print("Ошибка: введите корректную дату (например, 25.12.2026).")
             continue
 
         if task_date.date() < datetime.now().date():
-            print("Ошибка: дата не может быть в прошлом. Попробуйте снова.")
+            print("Ошибка: дата не может быть в прошлом.")
             continue
 
         return date_str
 
-tasks = []
-# Порядок приоритетов: чем меньше число, тем важнее
+# Порядок приоритетов: 
 PRIORITY_ORDER = {"Высокий": 1, "Средний": 2, "Низкий": 3}
 
-# блок сохранения в JSON при использовании ИИ
+tasks = []
+
+# Блок сохранения в JSON и отбраковка ошибок настроено при помощи ИИ
 if os.path.exists('tasks.json'):
     try:
         with open('tasks.json', 'r', encoding='utf-8') as f:
             tasks = json.load(f)
     except json.JSONDecodeError:
-        print("Внимание! Файл с задачами поврежден. Создан новый пустой список.")
+        print("Внимание! Файл поврежден. Начинаем с пустого списка.")
         tasks = []
     except Exception as e:
-        print(f"Неизвестная ошибка при чтении файла: {e}")
+        print(f"Ошибка чтения файла: {e}")
 
 def save_tasks():
     try:
@@ -41,106 +42,92 @@ def save_tasks():
     except Exception as e:
         print(f"Ошибка при сохранении: {e}")
 
-# блок основное меню
+# Блок основного меню и вспомогательные функции сортировки и фильтрации, основаны на рекомендациях ИИ
 def filter_tasks(tasks, mode):
-    """Фильтрует задачи: 'all' | 'active' | 'done'.
-    Возвращает новый список, не меняя исходный."""
+    """Фильтрует задачи: all, active или done."""
     if mode == "active":
         return [t for t in tasks if not t.get("done", False)]
     if mode == "done":
         return [t for t in tasks if t.get("done", False)]
     return list(tasks)
 
-
 def task_deadline_key(task):
-    """Ключ сортировки по сроку. Задачи без срока — в конец."""
+    """Сортировка по сроку. Без срока — в конец."""
     deadline = task.get("deadline")
     if not deadline:
         return datetime.max
     try:
         return datetime.strptime(deadline, "%d.%m.%Y")
     except ValueError:
-        return datetime.max   # битая дата — тоже в конец
-
+        return datetime.max
 
 def sort_tasks(tasks, mode):
-    """Сортирует задачи: 'deadline' | 'priority' | 'status' | 'none'.
-    Возвращает новый список."""
     if mode == "deadline":
         return sorted(tasks, key=task_deadline_key)
     if mode == "priority":
         return sorted(tasks, key=lambda t: PRIORITY_ORDER.get(t.get("priority"), 99))
     if mode == "status":
-        # сначала активные (False → 0), потом выполненные (True → 1)
         return sorted(tasks, key=lambda t: t.get("done", False))
     return list(tasks)
 
-
 def show_tasks(tasks):
-    """Выводит задачи с учётом выбранной пользователем фильтрации и сортировки."""
     if not tasks:
         print("Список пуст!")
         return
 
-    # --- выбор фильтра ---
-    print("\n1. Показать все задачи")
-    print("2. Только активные")
-    print("3. Только выполненные")
-    filter_choice = input("Что показать? (1-3): ").strip()
-    filter_map = {"1": "all", "2": "active", "3": "done"}
-    filter_mode = filter_map.get(filter_choice, "all")
-    if filter_choice not in filter_map:
-        print("Неверный выбор фильтра, показываю все задачи.")
+    print("\n1. Все задачи\n2. Только активные\n3. Только выполненные")
+    f_choice = input("Что показать? (1-3): ").strip()
+    f_map = {"1": "all", "2": "active", "3": "done"}
+    f_mode = f_map.get(f_choice, "all")
+    if f_choice not in f_map:
+        print("Неверный выбор, показываю все.")
 
-    # --- выбор сортировки ---
-    print("\nСортировка:")
-    print("1 - По сроку")
-    print("2 - По приоритету")
-    print("3 - По статусу")
-    print("4 - Без сортировки")
-    sort_choice = input("Ваш выбор (1-4): ").strip()
-    sort_map = {"1": "deadline", "2": "priority", "3": "status", "4": "none"}
-    sort_mode = sort_map.get(sort_choice, "none")
-    if sort_choice not in sort_map:
-        print("Неверный выбор сортировки, оставляю исходный порядок.")
+    print("\nСортировка:\n1 - По сроку\n2 - По приоритету\n3 - По статусу\n4 - Без сортировки")
+    s_choice = input("Ваш выбор (1-4): ").strip()
+    s_map = {"1": "deadline", "2": "priority", "3": "status", "4": "none"}
+    s_mode = s_map.get(s_choice, "none")
+    if s_choice not in s_map:
+        print("Неверный выбор сортировки.")
 
-    # --- фильтр, затем сортировка ---
-    result = sort_tasks(filter_tasks(tasks, filter_mode), sort_mode)
-
-    # --- вывод ---
-    print("\n- ВАШИ ЗАДАЧИ -")
+    result = sort_tasks(filter_tasks(tasks, f_mode), s_mode)
+    
+    print("\n ВАШИ ЗАДАЧИ ")
     if not result:
-        print("Нет задач, соответствующих фильтру.")
+        print("Нет задач по вашему фильтру.")
         return
 
     for i, task in enumerate(result, start=1):
         status = "[x]" if task.get("done", False) else "[ ]"
         deadline = task.get("deadline", "—")
-        print(f"{i}. {status} Название: {task['title']} | "
-              f"Приоритет: {task['priority']} | Срок: {deadline}")
+        print(f"{i}. {status} {task['title']} | Приоритет: {task['priority']} | Срок: {deadline}")
+
+# Основной цикл программы
 while True:
-    print("\n--- МЕНЕДЖЕР ЗАДАЧ ---")
+    print("\n МЕНЕДЖЕР ЗАДАЧ ")
     print("1. Добавить задачу")
     print("2. Показать все задачи")
     print("3. Отметить задачу выполненной")
     print("4. Удалить")
     print("5. Выход")
     
-    choice = input("Выберите действие (1-5): ")
+    choice = input("Выберите действие (1-5): ").strip()
     
-    if choice == "1": # блок ввода задачи и пользовательский выбор приоритета
+    if choice == "1": # Блок добавления задачи
         title = input("Введите название: ").strip()
         if not title:
-            print("Ошибка: Название задачи не может быть пустым!")
+            print("Ошибка: Название не может быть пустым!")
             continue
         description = input("Введите описание: ").strip()
         
         print("Выберите приоритет:\n1 - Высокий\n2 - Средний\n3 - Низкий")
         priority_choice = input("Ваш выбор (1-3): ")
         
-        if priority_choice == "1": priority = "Высокий"
-        elif priority_choice == "2": priority = "Средний"
-        elif priority_choice == "3": priority = "Низкий"
+        if priority_choice == "1":
+            priority = "Высокий"
+        elif priority_choice == "2":
+            priority = "Средний"
+        elif priority_choice == "3":
+            priority = "Низкий"
         else:
             print("Ошибка! Введите 1, 2 или 3")
             continue
@@ -157,61 +144,62 @@ while True:
         
         tasks.append(new_task)
         save_tasks()
-        print("Задача добавлена!")
+        print("Задача успешно добавлена!")
 
-    # блок сортировки и фильтрации
+    # Блок демонстрации всех задач в менеджере
     elif choice == "2":
         show_tasks(tasks)
 
-    elif choice == "3": # блок отметки задачи по выполнению
+    elif choice == "3": # Блок отметки выполнения задачи
         if len(tasks) == 0:
             print("Список пуст, нечего отмечать.")
         else:
-            print(" ВАШИ ЗАДАЧИ ")
+            print("\n- ВАШИ ЗАДАЧИ -")
             for i, task in enumerate(tasks, start=1):
-                status = "[x]" if task["done"] else "[ ]"
+                status = "[x]" if task.get("done", False) else "[ ]"
                 print(f"{i}. {status} {task['title']}")
             
             try:
-                num = int(input("Введите номер задачи для отметки: "))
+                num = int(input("Введите номер задачи: "))
             except ValueError:
                 print("Ошибка: нужно ввести число.")
                 continue
                 
             if num < 1 or num > len(tasks):
-                print("Ошибка: задачи с таким номером не существует!")
+                print("Ошибка: такой задачи нет!")
             else:
                 tasks[num - 1]["done"] = True
                 save_tasks()
-                print(f"Задача №{num} отмечена как выполненная!")
+                print(f"Задача №{num} выполнена!")
 
-    elif choice == "4": #блок удаления и подтверждения задачи
+    elif choice == "4": # Блок удаления с подтверждением
         if len(tasks) == 0:
             print("Список пуст, нечего удалять.")
         else:
-            print("- ВАШИ ЗАДАЧИ -")
+            print("\n- ВАШИ ЗАДАЧИ -")
             for i, task in enumerate(tasks, start=1):
-                status = "[x]" if task["done"] else "[ ]"
+                status = "[x]" if task.get("done", False) else "[ ]"
                 print(f"{i}. {status} {task['title']}")
             
             try:
-                num = int(input("Введите номер задачи для удаления: "))
+                num = int(input("Введите номер для удаления: "))
             except ValueError:
                 print("Ошибка: нужно ввести число.")
                 continue
                 
             if num < 1 or num > len(tasks):
-                print("Ошибка: задачи с таким номером не существует!")
+                print("Ошибка: такой задачи нет!")
             else:
-                confirm = input(f"Вы уверены, что хотите удалить '{tasks[num-1]['title']}'? (да/нет): ")
+                task_title = tasks[num - 1]['title']
+                confirm = input(f"Удалить '{task_title}'? (да/нет): ")
                 if confirm.lower() == "да":
                     tasks.pop(num - 1)
                     save_tasks()
-                    print("Удалено")
+                    print("Задача удалена.")
                 else: 
-                    print("Удаление отменено")              
+                    print("Удаление отменено.")              
 
-    elif choice == "5": # блок выхода и сохранения
+    elif choice == "5": # Блок выхода и сохранения
         save_tasks()
-        print("Задачи сохранены! До свидания.")
+        print("Данные сохранены!")
         break

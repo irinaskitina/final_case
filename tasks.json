@@ -48,20 +48,13 @@
         "description": "Проверка на вывод нумерации",
         "priority": "Высокий",
         "done": false,
-        "deadline": "11.12.2026"
+        "deadline": "03.11.2026"
     },
     {
-        "title": "Тест",
-        "description": "Тест123",
-        "priority": "Средний",
+        "title": "Тест сортировка",
+        "description": "Проверка",
+        "priority": "Низкий",
         "done": false,
-        "deadline": "12.12.2026"
-    },
-    {
-        "title": "Тест",
-        "description": "Проверка фильтрации и сортировки с помощью ии",
-        "priority": "Высокий",
-        "done": true,
-        "deadline": "11.12.2026"
+        "deadline": "03.11.2026"
     }
 ]
